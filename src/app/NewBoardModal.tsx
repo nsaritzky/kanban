@@ -21,7 +21,7 @@ interface Props {
   boardId?: string
   open: boolean
   onClose: () => void
-  setNewColumn: boolean
+  setNewColumn?: boolean
 }
 
 const NewBoardModal: React.FunctionComponent<Props> = ({
