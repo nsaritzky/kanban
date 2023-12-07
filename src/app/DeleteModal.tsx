@@ -1,5 +1,4 @@
 import { Dialog } from "@headlessui/react"
-import { useDispatch } from "react-redux"
 import Modal from "./Modal"
 
 interface Props {
@@ -17,8 +16,6 @@ const DeleteTaskModal: React.FunctionComponent<Props> = ({
   open,
   onClose,
 }) => {
-  const dispatch = useDispatch()
-
   return (
     <Modal open={open} onClose={onClose}>
       <Dialog.Title className="heading-lg mb-[24px] text-red">

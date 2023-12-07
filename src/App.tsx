@@ -22,7 +22,6 @@ function App() {
   useEffect(() => {
     if (boardIds.length > 0) {
       dispatch(setActiveBoardId(boardIds[0] as string))
-      console.log("set active board id")
     }
   }, [dataLoaded])
 

@@ -5,13 +5,9 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import { useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import { selectColumnById, selectColumnTaskIds } from "../columns/columnsSlice"
-import {
-  selectTaskById,
-  selectTasksByIds,
-  type Task,
-} from "../tasks/tasksSlice"
+import { selectTaskById, type Task } from "../tasks/tasksSlice"
 import ViewTaskModal from "./ViewTaskModal"
 import type { RootState } from "./store"
 
@@ -63,7 +59,6 @@ const Task: React.FunctionComponent<TaskProps> = ({
 }
 
 const Column = ({ columnId }: { columnId: string }) => {
-  const dispatch = useDispatch()
   const [viewTaskModal, setViewTaskModal] = useState(false)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
 
@@ -72,9 +67,6 @@ const Column = ({ columnId }: { columnId: string }) => {
   )
   const taskIds = useSelector((state: RootState) =>
     selectColumnTaskIds(state, columnId),
-  )
-  const tasks = useSelector((state: RootState) =>
-    selectTasksByIds(state, taskIds!),
   )
   const activeTaskSelected = useSelector((state: RootState) =>
     activeTask ? selectTaskById(state, activeTask.id) : undefined,

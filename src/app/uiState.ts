@@ -9,7 +9,7 @@ interface UIState {
   sidebarIsOpen: boolean
   viewTaskModal?: string | undefined
   editingTask?: string
-  activeBoardId: string | undefined
+  activeBoardId?: string | undefined
   dataLoaded: boolean // used to trigger an effect after data is loaded
 }
 
@@ -21,7 +21,7 @@ const UISlice = createSlice({
     newTaskModalIsOpen: false,
     newBoardModalIsOpen: false,
     sidebarIsOpen: true,
-    activeBoardId: null,
+    activeBoardId: undefined,
     dataLoaded: false,
   } as UIState,
   reducers: {
@@ -31,7 +31,7 @@ const UISlice = createSlice({
     toggleNav: (state) => {
       state.isNavOpen = !state.isNavOpen
     },
-    setActiveBoardId: (state, action: { payload: string }) => {
+    setActiveBoardId: (state, action: { payload: string | undefined }) => {
       state.activeBoardId = action.payload
     },
     toggleNewTaskModalIsOpen: (state) => {
