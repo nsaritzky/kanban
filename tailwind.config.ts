@@ -17,7 +17,7 @@ export default {
       "light-gray-light-bg": "#F4F7FD",
       white: "#FFFFFF",
       red: "#EA5555",
-      "red-hover": "FF9898",
+      "red-hover": "#FF9898",
     },
     borderRadius: {
       none: "0",

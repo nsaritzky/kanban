@@ -6,6 +6,7 @@ import {
 } from "@reduxjs/toolkit"
 import { nanoid } from "nanoid"
 import type { RootState } from "../app/store"
+import { selectActiveBoardId } from "../app/uiState"
 import {
   taskAdded,
   taskMoved,
@@ -92,6 +93,14 @@ const selectActiveBoard = createSelector(
   ],
   (boards, activeBoardId) =>
     activeBoardId ? boards.entities[activeBoardId] : undefined,
+)
+
+export const selectActiveBoardColumnIds = createSelector(
+  [selectActiveBoardId, selectAllColumns],
+  (activeBoardId, columns) =>
+    columns
+      .filter((column) => column.boardId === activeBoardId)
+      .map((column) => column.id),
 )
 
 export const selectActiveColumns = createSelector(

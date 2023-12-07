@@ -2,8 +2,13 @@ import { Dialog, Listbox, Switch } from "@headlessui/react"
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { Column, selectActiveColumns } from "../columns/columnsSlice"
-import { taskMoved, taskUpdated, type Task } from "../tasks/tasksSlice"
-import DeleteTaskModal from "./DeleteTaskModal"
+import {
+  taskMoved,
+  taskRemoved,
+  taskUpdated,
+  type Task,
+} from "../tasks/tasksSlice"
+import DeleteTaskModal from "./DeleteModal"
 import Modal from "./Modal"
 import NewTaskModal from "./NewTaskModal"
 import Check from "/assets/icon-check.svg"
@@ -202,9 +207,11 @@ const ViewTaskModal: React.FunctionComponent<Props> = ({
         onClose={() => setEditTaskModalOpen(false)}
       />
       <DeleteTaskModal
-        task={task}
         open={deleteModalOpen}
+        onConfirm={() => dispatch(taskRemoved({ task }))}
         onClose={() => setDeleteModalOpen(false)}
+        title="Delete Task"
+        description="Are you sure you want to delete {task.title}? This action cannot be undone."
       />
     </>
   )

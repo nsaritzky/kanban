@@ -9,19 +9,16 @@ import {
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useDispatch, useSelector } from "react-redux"
-import { selectBoardColumns } from "../boards/boardsSlice"
-import { selectAllColumns } from "../columns/columnsSlice"
+import {
+  selectActiveBoardColumnIds,
+  selectAllColumns,
+} from "../columns/columnsSlice"
 import { selectAllTasks, taskMoved } from "../tasks/tasksSlice"
 import Column from "./Column"
-import { RootState } from "./store"
-import { selectActiveBoardId } from "./uiState"
 
 const MainPanel = () => {
   const dispatch = useDispatch()
-  const activeBoardId = useSelector(selectActiveBoardId)
-  const columnIds = useSelector((state: RootState) =>
-    activeBoardId ? selectBoardColumns(state, activeBoardId) : [],
-  )
+  const columnIds = useSelector(selectActiveBoardColumnIds)
   const columns = useSelector(selectAllColumns)
   const tasks = useSelector(selectAllTasks)
 

@@ -7,7 +7,7 @@ import { nanoid } from "nanoid"
 import { type RootState } from "../app/store"
 import { columnAdded } from "../columns/columnsSlice"
 
-interface Board {
+export interface Board {
   id: string
   title: string
   columnIds: string[]
@@ -29,6 +29,7 @@ const boardsSlice = createSlice({
     },
     boardUpdated: boardsAdapter.updateOne,
     boardsRemoved: boardsAdapter.removeMany,
+    boardRemoved: boardsAdapter.removeOne,
   },
   extraReducers: (builder) => {
     builder.addCase(columnAdded, (state, action) => {
@@ -48,6 +49,7 @@ export const selectBoardColumns = createSelector(
   (board) => board?.columnIds,
 )
 
-export const { boardAdded, boardUpdated, boardsRemoved } = boardsSlice.actions
+export const { boardAdded, boardUpdated, boardsRemoved, boardRemoved } =
+  boardsSlice.actions
 
 export default boardsSlice.reducer

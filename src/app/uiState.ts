@@ -9,7 +9,7 @@ interface UIState {
   sidebarIsOpen: boolean
   viewTaskModal?: string | undefined
   editingTask?: string
-  activeBoardId: string | null
+  activeBoardId: string | undefined
   dataLoaded: boolean // used to trigger an effect after data is loaded
 }
 

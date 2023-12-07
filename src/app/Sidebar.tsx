@@ -1,7 +1,9 @@
 import { Switch, Tab } from "@headlessui/react"
+import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { selectAllBoards, selectBoardIds } from "../boards/boardsSlice"
 import useScreenSize from "../utilities/useScreenSize"
+import NewBoardModal from "./NewBoardModal"
 import {
   selectActiveBoardId,
   selectIsDarkMode,
@@ -9,7 +11,6 @@ import {
   setActiveBoardId,
   setDarkMode,
   setSidebar,
-  toggleNewBoardModal,
 } from "./uiState"
 import BoardIcon from "/assets/icon-board.svg?react"
 import MoonIcon from "/assets/icon-dark-theme.svg"
@@ -18,6 +19,8 @@ import SunIcon from "/assets/icon-light-theme.svg"
 import VisibleIcon from "/assets/icon-show-sidebar.svg"
 
 const BoardList = () => {
+  const [newBoardModalOpen, setNewBoardModalOpen] = useState(false)
+
   const boards = useSelector(selectAllBoards)
   const darkMode = useSelector(selectIsDarkMode)
   const boardIds = useSelector(selectBoardIds)
@@ -65,11 +68,15 @@ const BoardList = () => {
           </Tab.Group>
           <button
             className="heading-md flex h-[48px] items-center pl-[32px] text-main-purple"
-            onClick={() => dispatch(toggleNewBoardModal())}
+            onClick={() => setNewBoardModalOpen(true)}
           >
             <BoardIcon className="mr-[16px] stroke-main-purple" />
             <div>+ Create New Board</div>
           </button>
+          <NewBoardModal
+            open={newBoardModalOpen}
+            onClose={() => setNewBoardModalOpen(false)}
+          />
         </div>
         <div>
           <div className="mx-[13px] mb-[8px] box-border flex h-[48px] w-[235px] items-center justify-center rounded bg-light-gray-light-bg dark:bg-very-dark-gray lg:w-[250px]">

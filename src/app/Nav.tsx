@@ -1,11 +1,13 @@
-import { useState } from "react"
-import { useSelector } from "react-redux"
-import { selectAllBoards } from "../boards/boardsSlice"
+import { useEffect, useRef, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { boardRemoved, selectAllBoards } from "../boards/boardsSlice"
 import useScreenSize from "../utilities/useScreenSize"
+import DeleteModal from "./DeleteModal"
 import MobileMenu from "./MobileMenu"
+import NewBoardModal from "./NewBoardModal"
 import NewTaskModal from "./NewTaskModal"
 import { type RootState } from "./store"
-import { selectActiveBoardId } from "./uiState"
+import { selectActiveBoardId, setActiveBoardId } from "./uiState"
 import chevronDown from "/assets/icon-chevron-down.svg"
 import threeDots from "/assets/icon-vertical-ellipsis.svg"
 import logoDark from "/assets/logo-dark.svg"
@@ -13,8 +15,13 @@ import logoLight from "/assets/logo-light.svg"
 import logoMobile from "/assets/logo-mobile.svg"
 
 const Nav = () => {
+  const dispatch = useDispatch()
+
   const [newTaskModal, setNewTaskModal] = useState(false)
   const [mobileMenu, setMobileMenu] = useState(false)
+  const [editBoardPopup, setEditBoardPopup] = useState(false)
+  const [editBoardModalOpen, setEditBoardModalOpen] = useState(false)
+  const [deleteBoardModalOpen, setDeleteBoardModalOpen] = useState(false)
   // const newTaskModalIsOpen = useSelector(selectNewTaskModalIsOpen)
   const activeBoardId = useSelector(selectActiveBoardId)
   const boards = useSelector(selectAllBoards)
@@ -23,6 +30,25 @@ const Nav = () => {
 
   const { width: screenWidth } = useScreenSize()
   const isSmallScreen = screenWidth < 640
+
+  const editMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        editMenuRef.current &&
+        !editMenuRef.current.contains(event.target as Node)
+      ) {
+        setEditBoardPopup(false) // Close the component
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [editMenuRef])
 
   return (
     <>
@@ -62,7 +88,52 @@ const Nav = () => {
               open={newTaskModal}
               onClose={() => setNewTaskModal(false)}
             />
-            <img className="h-min" src={threeDots} alt="three dots" />
+            <button
+              onClick={() => setEditBoardPopup(true)}
+              disabled={!activeBoardId}
+            >
+              <img className="h-min" src={threeDots} alt="three dots" />
+            </button>
+            {editBoardPopup && (
+              <div
+                ref={editMenuRef}
+                className="fixed right-[24px] top-[90px] mt-[10px] flex w-[192px] flex-col items-start gap-[16px] rounded-lg bg-white p-[16px] text-left text-medium-gray dark:bg-very-dark-gray"
+              >
+                <button
+                  onClick={() => {
+                    setEditBoardModalOpen(true)
+                    setEditBoardPopup(false)
+                  }}
+                  className="body-lg text-medium-gray"
+                >
+                  Edit Board
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteBoardModalOpen(true)
+                    setEditBoardPopup(false)
+                  }}
+                  className="body-lg text-red"
+                >
+                  Delete Board
+                </button>
+              </div>
+            )}
+            <NewBoardModal
+              boardId={activeBoardId}
+              open={editBoardModalOpen}
+              onClose={() => setEditBoardModalOpen(false)}
+            />
+            <DeleteModal
+              title="Delete Board"
+              description={`Are you sure you want to delete the '${activeBoard?.title}' board? This action will remove all columns and tasks and cannot be reversed.`}
+              onConfirm={() => {
+                dispatch(boardRemoved(activeBoardId!))
+                dispatch(setActiveBoardId(undefined))
+              }}
+              open={deleteBoardModalOpen}
+              onClose={() => setDeleteBoardModalOpen(false)}
+            />
           </div>
         </div>
       </div>

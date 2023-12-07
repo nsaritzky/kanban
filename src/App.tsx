@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux"
 import data from "../data.json"
 import MainPanel from "./app/MainPanel"
 import Nav from "./app/Nav"
-import NewBoardModal from "./app/NewBoardModal"
 import Sidebar from "./app/Sidebar"
 import {
   selectDataLoaded,
@@ -33,7 +32,6 @@ function App() {
         darkMode && "dark"
       }`}
     >
-      <NewBoardModal />
       <Nav />
       <div className="flex w-full grow">
         <Sidebar />
