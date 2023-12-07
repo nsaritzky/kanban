@@ -8,6 +8,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
+import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import {
   selectActiveBoardColumnIds,
@@ -15,9 +16,13 @@ import {
 } from "../columns/columnsSlice"
 import { selectAllTasks, taskMoved } from "../tasks/tasksSlice"
 import Column from "./Column"
+import NewBoardModal from "./NewBoardModal"
+import { selectActiveBoardId } from "./uiState"
 
 const MainPanel = () => {
   const dispatch = useDispatch()
+  const [editBoardModal, setEditBoardModal] = useState(false)
+  const activeBoardId = useSelector(selectActiveBoardId)
   const columnIds = useSelector(selectActiveBoardColumnIds)
   const columns = useSelector(selectAllColumns)
   const tasks = useSelector(selectAllTasks)
@@ -42,7 +47,7 @@ const MainPanel = () => {
   }
 
   return (
-    <div className="flex h-full w-full gap-[24px] overflow-x-auto bg-light-gray-light-bg pl-[24px] pt-[24px] dark:bg-very-dark-gray">
+    <div className=" flex h-full w-full gap-[24px] overflow-x-auto bg-light-gray-light-bg pl-[24px] pt-[24px] dark:bg-very-dark-gray">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -52,6 +57,20 @@ const MainPanel = () => {
           ? columnIds.map((id) => <Column key={id} columnId={id} />)
           : null}
       </DndContext>
+      <button
+        onClick={() => setEditBoardModal(true)}
+        className="group mb-[50px] mt-[39px] h-full w-[280px] rounded bg-gradient-to-t from-[#E9EFFA]/50 to-[#E9EFFA]"
+      >
+        <span className="heading-xl block w-[280px] text-medium-gray group-hover:text-main-purple">
+          + New Column
+        </span>
+      </button>
+      <NewBoardModal
+        setNewColumn
+        boardId={activeBoardId}
+        open={editBoardModal}
+        onClose={() => setEditBoardModal(false)}
+      />
     </div>
   )
 }

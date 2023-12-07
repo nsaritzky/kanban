@@ -21,18 +21,20 @@ interface Props {
   boardId?: string
   open: boolean
   onClose: () => void
+  setNewColumn: boolean
 }
 
 const NewBoardModal: React.FunctionComponent<Props> = ({
   boardId,
   open,
   onClose,
+  setNewColumn,
 }) => {
+  const dispatch = useDispatch()
   const board = useSelector((state: RootState) =>
     boardId ? selectBoardById(state, boardId) : undefined,
   )
   const boardColumns = useSelector(selectActiveColumns)
-  const dispatch = useDispatch()
 
   interface FormData {
     name: string
@@ -64,10 +66,13 @@ const NewBoardModal: React.FunctionComponent<Props> = ({
           { name: "" },
         ],
       })
+      if (setNewColumn) {
+        append({ name: "" })
+      }
     } else {
       reset(defaultValues)
     }
-  }, [board, boardColumns, reset, defaultValues])
+  }, [board, boardColumns, reset, defaultValues, setNewColumn, append])
 
   const onSubmit = handleSubmit((data) => {
     // If the board already exists, update it. Otherwise, create a new board
