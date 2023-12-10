@@ -4,7 +4,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { useState } from "react"
+import { forwardRef, useState } from "react"
 import { useSelector } from "react-redux"
 import { selectColumnById, selectColumnTaskIds } from "../columns/columnsSlice"
 import { selectTaskById, type Task } from "../tasks/tasksSlice"
@@ -13,48 +13,69 @@ import type { RootState } from "./store"
 
 interface TaskProps {
   taskId: string
+  setViewTaskModal?: (val: boolean) => void
+  setActiveTask?: (task: Task) => void
+  style?: React.CSSProperties
+}
+
+export const TaskElement = forwardRef<HTMLDivElement, TaskProps>(
+  ({ taskId, setViewTaskModal, setActiveTask, ...props }, ref) => {
+    const task = useSelector((state: RootState) =>
+      selectTaskById(state, taskId),
+    )
+    const totalSubtasks = task?.subtasks?.length
+    const completedSubtasks = task?.subtasks?.filter(
+      (subtask) => subtask.completed,
+    ).length
+
+    if (!task) {
+      return null
+    }
+
+    return (
+      <div ref={ref} {...props}>
+        <button
+          onClick={() => {
+            if (setActiveTask && setViewTaskModal) {
+              setActiveTask(task)
+              setViewTaskModal(true)
+            }
+          }}
+          className="group flex w-full flex-col rounded-lg bg-white py-[23px] pl-[16px] shadow dark:bg-dark-gray"
+        >
+          <div className="heading-md mb-[8px] text-left text-black group-hover:text-main-purple dark:text-white">
+            {task?.title}
+          </div>
+          <div className="body-md text-medium-gray">{`${completedSubtasks} of ${totalSubtasks} subtasks`}</div>
+        </button>
+      </div>
+    )
+  },
+)
+
+interface SortableTaskProps {
+  taskId: string
   setViewTaskModal: (val: boolean) => void
   setActiveTask: (task: Task) => void
 }
 
-const Task: React.FunctionComponent<TaskProps> = ({
-  taskId,
-  setViewTaskModal,
-  setActiveTask,
-}) => {
-  const task = useSelector((state: RootState) => selectTaskById(state, taskId))
-  const totalSubtasks = task?.subtasks?.length
-  const completedSubtasks = task?.subtasks?.filter(
-    (subtask) => subtask.completed,
-  ).length
-
-  const { listeners, attributes, setNodeRef, transform, transition } =
-    useSortable({ id: taskId })
+const SortableTask: React.FunctionComponent<SortableTaskProps> = (props) => {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: props.taskId })
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   }
 
-  if (!task) {
-    return null
-  }
-
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <button
-        onClick={() => {
-          setActiveTask(task)
-          setViewTaskModal(true)
-        }}
-        className="group flex w-full flex-col rounded-lg bg-white py-[23px] pl-[16px] shadow dark:bg-dark-gray"
-      >
-        <div className="heading-md mb-[8px] text-left text-black group-hover:text-main-purple dark:text-white">
-          {task?.title}
-        </div>
-        <div className="body-md text-medium-gray">{`${completedSubtasks} of ${totalSubtasks} subtasks`}</div>
-      </button>
-    </div>
+    <TaskElement
+      ref={setNodeRef}
+      {...listeners}
+      style={style}
+      {...attributes}
+      {...props}
+    />
   )
 }
 
@@ -84,7 +105,7 @@ const Column = ({ columnId }: { columnId: string }) => {
           onClose={() => setViewTaskModal(false)}
         />
         {taskIds.map((id) => (
-          <Task
+          <SortableTask
             setViewTaskModal={setViewTaskModal}
             setActiveTask={setActiveTask}
             taskId={id}

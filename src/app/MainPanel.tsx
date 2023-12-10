@@ -1,11 +1,13 @@
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCorners,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useState } from "react"
@@ -15,13 +17,14 @@ import {
   selectAllColumns,
 } from "../columns/columnsSlice"
 import { selectAllTasks, taskMoved } from "../tasks/tasksSlice"
-import Column from "./Column"
+import Column, { TaskElement } from "./Column"
 import NewBoardModal from "./NewBoardModal"
 import { selectActiveBoardId } from "./uiState"
 
 const MainPanel = () => {
   const dispatch = useDispatch()
   const [editBoardModal, setEditBoardModal] = useState(false)
+  const [draggedId, setDraggedId] = useState<string | null>(null)
   const activeBoardId = useSelector(selectActiveBoardId)
   const columnIds = useSelector(selectActiveBoardColumnIds)
   const columns = useSelector(selectAllColumns)
@@ -34,7 +37,12 @@ const MainPanel = () => {
     }),
   )
 
+  const onDragStart = ({ active }: DragStartEvent) => {
+    setDraggedId(active.id as string)
+  }
+
   const onDragEnd = ({ active, over }: DragEndEvent) => {
+    setDraggedId(null)
     if (over && active.id !== over.id) {
       const task = tasks.find((task) => task.id == active.id)!
       const overTask = tasks.find((task) => task.id == over.id)!
@@ -51,12 +59,17 @@ const MainPanel = () => {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
+        onDragStart={onDragStart}
         onDragEnd={onDragEnd}
       >
         {columnIds
           ? columnIds.map((id) => <Column key={id} columnId={id} />)
           : null}
+        <DragOverlay>
+          {draggedId ? <TaskElement taskId={draggedId} /> : null}
+        </DragOverlay>
       </DndContext>
+
       <button
         onClick={() => setEditBoardModal(true)}
         className="group mb-[50px] mt-[39px] h-full w-[280px] rounded bg-gradient-to-t from-[#E9EFFA]/50 to-[#E9EFFA]"
