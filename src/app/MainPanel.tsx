@@ -72,7 +72,7 @@ const MainPanel = () => {
 
       <button
         onClick={() => setEditBoardModal(true)}
-        className="group mb-[50px] mt-[39px] h-full w-[280px] rounded bg-gradient-to-t from-[#E9EFFA]/50 to-[#E9EFFA]"
+        className="group mb-[50px] mt-[39px] h-full w-[280px] rounded bg-gradient-to-t from-[#E9EFFA]/50 to-[#E9EFFA] dark:from-[#2B2C3780] dark:to-[#2B2C37]"
       >
         <span className="heading-xl block w-[280px] text-medium-gray group-hover:text-main-purple">
           + New Column
