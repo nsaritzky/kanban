@@ -4,7 +4,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { forwardRef, useState } from "react"
+import { Fragment, forwardRef, useState } from "react"
 import { useSelector } from "react-redux"
 import { selectColumnById, selectColumnTaskIds } from "../columns/columnsSlice"
 import { selectTaskById, type Task } from "../tasks/tasksSlice"
@@ -16,10 +16,11 @@ interface TaskProps {
   setViewTaskModal?: (val: boolean) => void
   setActiveTask?: (task: Task) => void
   style?: React.CSSProperties
+  dragging?: boolean
 }
 
 export const TaskElement = forwardRef<HTMLDivElement, TaskProps>(
-  ({ taskId, setViewTaskModal, setActiveTask, ...props }, ref) => {
+  ({ taskId, setViewTaskModal, setActiveTask, dragging, ...props }, ref) => {
     const task = useSelector((state: RootState) =>
       selectTaskById(state, taskId),
     )
@@ -41,7 +42,7 @@ export const TaskElement = forwardRef<HTMLDivElement, TaskProps>(
               setViewTaskModal(true)
             }
           }}
-          className="group flex w-full flex-col rounded-lg bg-white py-[23px] pl-[16px] shadow dark:bg-dark-gray"
+          className={`group flex w-full flex-col rounded-lg bg-white py-[23px] pl-[16px] shadow dark:bg-dark-gray`}
         >
           <div className="heading-md mb-[8px] text-left text-black group-hover:text-main-purple dark:text-white">
             {task?.title}
@@ -57,15 +58,23 @@ interface SortableTaskProps {
   taskId: string
   setViewTaskModal: (val: boolean) => void
   setActiveTask: (task: Task) => void
+  dragging?: boolean
 }
 
 const SortableTask: React.FunctionComponent<SortableTaskProps> = (props) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: props.taskId })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: props.taskId })
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   }
 
   return (
@@ -79,9 +88,23 @@ const SortableTask: React.FunctionComponent<SortableTaskProps> = (props) => {
   )
 }
 
-const Column = ({ columnId }: { columnId: string }) => {
+interface ColumnProps {
+  columnId: string
+  draggedId: string | null
+  draggedOver?: boolean
+  placeholderIndex?: number | null
+}
+
+const Column: React.FunctionComponent<ColumnProps> = ({
+  columnId,
+  draggedId,
+  draggedOver,
+  placeholderIndex,
+}) => {
   const [viewTaskModal, setViewTaskModal] = useState(false)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+  const showPlaceholder = draggedOver && draggedId
 
   const column = useSelector((state: RootState) =>
     selectColumnById(state, columnId),
@@ -104,13 +127,18 @@ const Column = ({ columnId }: { columnId: string }) => {
           open={viewTaskModal}
           onClose={() => setViewTaskModal(false)}
         />
-        {taskIds.map((id) => (
-          <SortableTask
-            setViewTaskModal={setViewTaskModal}
-            setActiveTask={setActiveTask}
-            taskId={id}
-            key={id}
-          />
+        {taskIds.map((id, i) => (
+          <Fragment key={id}>
+            {showPlaceholder && placeholderIndex == i && (
+              <TaskElement taskId={draggedId} />
+            )}
+            <SortableTask
+              setViewTaskModal={setViewTaskModal}
+              setActiveTask={setActiveTask}
+              taskId={id}
+              dragging={draggedId == id}
+            />
+          </Fragment>
         ))}
       </div>
     </SortableContext>

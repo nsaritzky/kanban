@@ -7,6 +7,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from "@dnd-kit/core"
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
@@ -25,6 +26,10 @@ const MainPanel = () => {
   const dispatch = useDispatch()
   const [editBoardModal, setEditBoardModal] = useState(false)
   const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [overContainerId, setOverContainerId] = useState<string | null>(null)
+  const [placeHolderIndex, setPlaceHolderIndex] = useState<
+    number | undefined | null
+  >(null)
   const activeBoardId = useSelector(selectActiveBoardId)
   const columnIds = useSelector(selectActiveBoardColumnIds)
   const columns = useSelector(selectAllColumns)
@@ -41,8 +46,25 @@ const MainPanel = () => {
     setDraggedId(active.id as string)
   }
 
+  const onDragOver = ({ over }: DragOverEvent) => {
+    if (over?.id && columnIds.includes(over?.id as string)) {
+      setOverContainerId(over?.id as string)
+    } else {
+      const task = tasks.find((task) => task.id == over?.id)
+      if (task) {
+        setOverContainerId(task.column)
+        setPlaceHolderIndex(
+          columns
+            .find((column) => column.id == task.column)
+            ?.taskIds.findIndex((id) => id == task.id),
+        )
+      }
+    }
+  }
+
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     setDraggedId(null)
+    setOverContainerId(null)
     if (over && active.id !== over.id) {
       const task = tasks.find((task) => task.id == active.id)!
       const overTask = tasks.find((task) => task.id == over.id)!
@@ -60,10 +82,18 @@ const MainPanel = () => {
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={onDragStart}
+        onDragOver={onDragOver}
         onDragEnd={onDragEnd}
       >
         {columnIds
-          ? columnIds.map((id) => <Column key={id} columnId={id} />)
+          ? columnIds.map((id) => (
+              <Column
+                draggedId={draggedId}
+                key={id}
+                columnId={id}
+                draggedOver={overContainerId == id}
+              />
+            ))
           : null}
         <DragOverlay>
           {draggedId ? <TaskElement taskId={draggedId} /> : null}
