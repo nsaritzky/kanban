@@ -4,7 +4,6 @@ import {
   createSelector,
   createSlice,
 } from "@reduxjs/toolkit"
-import { nanoid } from "nanoid"
 import type { RootState } from "../app/store"
 import { selectActiveBoardId } from "../app/uiState"
 import {
@@ -29,19 +28,14 @@ const columnsSlice = createSlice({
   name: "columns",
   initialState,
   reducers: {
-    columnAdded: {
-      reducer: columnsAdapter.addOne,
-      prepare: (column: Omit<Column, "id">) => ({
-        payload: { ...column, id: nanoid() },
-      }),
-    },
+    columnAdded: columnsAdapter.addOne,
     columnUpdated: columnsAdapter.updateOne,
     columnsRemoved: columnsAdapter.removeMany,
   },
   extraReducers: (builder) => {
     builder
       .addCase(taskAdded, (state, action) => {
-        const { task } = action.payload
+        const task = action.payload
         state.entities[task.column]?.taskIds.push(task.id)
       })
       .addCase(taskMoved, (state, action) => {

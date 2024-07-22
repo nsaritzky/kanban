@@ -1,6 +1,7 @@
 import { Dialog, Listbox, Switch } from "@headlessui/react"
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useDeleteTaskMutation, useUpdateTaskMutation } from "../apiSlice"
 import { Column, selectActiveColumns } from "../columns/columnsSlice"
 import {
   taskMoved,
@@ -11,6 +12,7 @@ import {
 import DeleteTaskModal from "./DeleteModal"
 import Modal from "./Modal"
 import NewTaskModal from "./NewTaskModal"
+import { selectActiveBoardId } from "./uiState"
 import Check from "/assets/icon-check.svg"
 import ChevronDown from "/assets/icon-chevron-down.svg"
 import DotsIcon from "/assets/icon-vertical-ellipsis.svg"
@@ -36,11 +38,15 @@ const ViewTaskModal: React.FunctionComponent<Props> = ({
   //   taskId ? selectTaskById(state, taskId) : undefined,
   // )
   const activeColumns = useSelector(selectActiveColumns)
+  const activeBoardId = useSelector(selectActiveBoardId)
   const totalSubtasks = task?.subtasks?.length
   const completedSubtasks = task?.subtasks?.filter(
     (subtask) => subtask.completed,
   ).length
   const dispatch = useDispatch()
+  const [deleteTask] = useDeleteTaskMutation()
+  const [updateTask, { isLoading: updateTaskLoading, error: updateTaskError }] =
+    useUpdateTaskMutation()
 
   // Close the little edit popup menu when clicking outside of it
   useEffect(() => {
@@ -64,8 +70,22 @@ const ViewTaskModal: React.FunctionComponent<Props> = ({
     return null
   }
 
+  const onConfirmDelete = async () => {
+    if (task) {
+      dispatch(taskRemoved({ task }))
+      await deleteTask({ boardId: task.board, taskId: task.id })
+    }
+  }
+
   const onColumnNameChange = (newColumn: Column) => {
     if (newColumn) {
+      updateTask({
+        boardId: activeBoardId!,
+        taskId: task.id,
+        task: {
+          status: newColumn.title,
+        },
+      })
       dispatch(
         taskMoved({
           task,
@@ -77,6 +97,21 @@ const ViewTaskModal: React.FunctionComponent<Props> = ({
   }
 
   const toggleSubtask = (index: number) => {
+    updateTask({
+      boardId: activeBoardId!,
+      taskId: task.id,
+      task: {
+        subtasks: task.subtasks.map((subtask, i) => {
+          if (i === index) {
+            return {
+              ...subtask,
+              completed: !subtask.completed,
+            }
+          }
+          return subtask
+        }),
+      },
+    })
     dispatch(
       taskUpdated(task, {
         subtasks: task.subtasks.map((subtask, i) => {
@@ -208,7 +243,7 @@ const ViewTaskModal: React.FunctionComponent<Props> = ({
       />
       <DeleteTaskModal
         open={deleteModalOpen}
-        onConfirm={() => dispatch(taskRemoved({ task }))}
+        onConfirm={onConfirmDelete}
         onClose={() => setDeleteModalOpen(false)}
         title="Delete Task"
         description="Are you sure you want to delete {task.title}? This action cannot be undone."

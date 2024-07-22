@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import data from "../data.json"
+import { RouterProvider, createBrowserRouter } from "react-router-dom"
+import { useGetBoardsQuery } from "./apiSlice"
 import MainPanel from "./app/MainPanel"
 import Nav from "./app/Nav"
 import Sidebar from "./app/Sidebar"
@@ -11,9 +12,20 @@ import {
 } from "./app/uiState"
 import { selectBoardIds } from "./boards/boardsSlice"
 import { useData } from "./data"
+import Login from "./login"
+import { isAuthenticated } from "./utilities/isAuthenticated"
+
+const router = createBrowserRouter([
+  { path: "/kanban", Component: App },
+  {
+    path: "/kanban/login",
+    Component: Login,
+  },
+])
 
 function App() {
-  useData(data)
+  const { data: boards } = useGetBoardsQuery()
+  useData(boards || { boards: [] })
   const darkMode = useSelector(selectIsDarkMode)
   const boardIds = useSelector(selectBoardIds)
   const dataLoaded = useSelector(selectDataLoaded)
@@ -23,7 +35,13 @@ function App() {
     if (boardIds.length > 0) {
       dispatch(setActiveBoardId(boardIds[0] as string))
     }
-  }, [dataLoaded])
+  }, [dataLoaded, boardIds, dispatch])
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.navigate("/kanban/login")
+    }
+  }, [])
 
   return (
     <div
@@ -40,4 +58,6 @@ function App() {
   )
 }
 
-export default App
+const AppWithRouter = () => <RouterProvider router={router} />
+
+export default AppWithRouter

@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit"
 
+import { apiSlice } from "../apiSlice"
 import boardsReducer from "../boards/boardsSlice"
 import columnsReducer from "../columns/columnsSlice"
 import tasksReducer from "../tasks/tasksSlice"
@@ -11,7 +12,10 @@ const store = configureStore({
     columns: columnsReducer,
     boards: boardsReducer,
     UI: uiReducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware),
 })
 
 export default store

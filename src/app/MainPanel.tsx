@@ -13,6 +13,7 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useMoveTaskMutation } from "../apiSlice"
 import {
   selectActiveBoardColumnIds,
   selectAllColumns,
@@ -34,6 +35,7 @@ const MainPanel = () => {
   const columnIds = useSelector(selectActiveBoardColumnIds)
   const columns = useSelector(selectAllColumns)
   const tasks = useSelector(selectAllTasks)
+  const [moveTask] = useMoveTaskMutation()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -73,6 +75,12 @@ const MainPanel = () => {
       )!
       const index = targetColumn?.taskIds.findIndex((id) => id == over?.id)
       dispatch(taskMoved({ task, newColumnId: overTask?.column, index }))
+      moveTask({
+        boardId: activeBoardId!,
+        taskId: task.id,
+        newStatus: targetColumn?.title,
+        position: index!,
+      })
     }
   }
 

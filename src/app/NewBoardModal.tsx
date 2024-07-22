@@ -3,6 +3,11 @@ import { useEffect, useMemo } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "react-redux"
 import {
+  useDeleteColumnMutation,
+  useNewBoardMutation,
+  useNewColumnMutation,
+} from "../apiSlice"
+import {
   boardAdded,
   boardUpdated,
   selectBoardById,
@@ -35,6 +40,9 @@ const NewBoardModal: React.FunctionComponent<Props> = ({
     boardId ? selectBoardById(state, boardId) : undefined,
   )
   const boardColumns = useSelector(selectActiveColumns)
+  const [newBoard] = useNewBoardMutation()
+  const [newColumn] = useNewColumnMutation()
+  const [deleteColumn] = useDeleteColumnMutation()
 
   interface FormData {
     name: string
@@ -74,26 +82,40 @@ const NewBoardModal: React.FunctionComponent<Props> = ({
     }
   }, [board, boardColumns, reset, defaultValues, setNewColumn, append])
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit(async (data) => {
     // If the board already exists, update it. Otherwise, create a new board
     if (board) {
       // Preserve the columnIds of the existing columns, then generate new Ids for any new columns
-      const columnIds = data.columns.map((columnName, i) => {
-        if (i < boardColumns.length) {
-          return boardColumns[i].id
-        } else {
-          const columnAction = columnAdded({
-            title: columnName.name,
-            taskIds: [],
-            boardId: board.id,
-          })
-          dispatch(columnAction)
-          return columnAction.payload.id
-        }
-      })
+      const columnIds = await Promise.all(
+        data.columns.map(async (columnName, i) => {
+          if (i < boardColumns.length) {
+            return boardColumns[i].id
+          } else {
+            const newColumnId = await newColumn({
+              title: columnName.name,
+              boardId: board.id,
+            }).unwrap()
+            console.log("hello")
+            const columnAction = columnAdded({
+              id: newColumnId,
+              title: columnName.name,
+              taskIds: [],
+              boardId: board.id,
+            })
+            dispatch(columnAction)
+            return columnAction.payload.id
+          }
+        }),
+      )
       // If there are fewer columns after than before, then delete the extras
       if (columnIds.length < boardColumns.length) {
         const columnsToDelete = boardColumns.slice(columnIds.length)
+        columnsToDelete.forEach(async (column) => {
+          await deleteColumn({
+            boardId: board.id,
+            columnId: column.id,
+          }).unwrap()
+        })
         dispatch(columnsRemoved(columnsToDelete.map((column) => column.id)))
       }
       dispatch(
@@ -104,13 +126,23 @@ const NewBoardModal: React.FunctionComponent<Props> = ({
       )
       onClose()
     } else {
-      const addBoardAction = boardAdded({ title: data.name, columnIds: [] })
+      const board = await newBoard({
+        title: data.name,
+        columns: data.columns.map((col) => ({ title: col.name, tasks: [] })),
+      }).unwrap()
+      console.log(board)
+      const addBoardAction = boardAdded({
+        id: board._id,
+        title: data.name,
+        columnIds: [],
+      })
       dispatch(addBoardAction)
-      const newColumnActions = data.columns.map((column) =>
+      const newColumnActions = board.columns.map((column) =>
         columnAdded({
-          title: column.name,
+          id: column._id,
+          title: column.title,
           taskIds: [],
-          boardId: addBoardAction.payload.id,
+          boardId: board._id,
         }),
       )
       newColumnActions.forEach((action) => dispatch(action))

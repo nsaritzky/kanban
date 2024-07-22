@@ -7,10 +7,11 @@ import { taskAdded, tasksRemoved } from "./tasks/tasksSlice"
 
 interface Subtask {
   title: string
-  isCompleted: boolean
+  completed: boolean
 }
 
 interface Task {
+  _id: string
   title: string
   description: string
   status: string
@@ -18,12 +19,14 @@ interface Task {
 }
 
 interface Column {
-  name: string
+  _id: string
+  title: string
   tasks: Task[]
 }
 
 interface Board {
-  name: string
+  _id: string
+  title: string
   columns: Column[]
 }
 
@@ -35,12 +38,17 @@ export const useData = ({ boards }: { boards: Board[] }) => {
     const taskIds: string[] = []
 
     for (const board of boards) {
-      const boardAction = boardAdded({ title: board.name, columnIds: [] })
+      const boardAction = boardAdded({
+        id: board._id,
+        title: board.title,
+        columnIds: [],
+      })
       boardIds.push(boardAction.payload.id)
       dispatch(boardAction)
       for (const column of board.columns) {
         const columnAction = columnAdded({
-          title: column.name,
+          id: column._id,
+          title: column.title,
           boardId: boardAction.payload.id,
           taskIds: [],
         })
@@ -48,16 +56,17 @@ export const useData = ({ boards }: { boards: Board[] }) => {
         dispatch(columnAction)
         for (const task of column.tasks) {
           const taskAction = taskAdded({
+            id: task._id,
             title: task.title,
             description: task.description,
             column: columnAction.payload.id,
             board: boardAction.payload.id,
             subtasks: task.subtasks.map((subtask) => ({
               title: subtask.title,
-              completed: subtask.isCompleted,
+              completed: subtask.completed,
             })),
           })
-          taskIds.push(taskAction.payload.task.id)
+          taskIds.push(task._id)
           dispatch(taskAction)
         }
       }
@@ -69,5 +78,5 @@ export const useData = ({ boards }: { boards: Board[] }) => {
       dispatch(columnsRemoved(columnIds))
       dispatch(tasksRemoved(taskIds))
     }
-  }, [])
+  }, [boards, dispatch])
 }

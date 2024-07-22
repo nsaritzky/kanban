@@ -2,6 +2,7 @@ import { Dialog, Listbox } from "@headlessui/react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "react-redux"
+import { useNewTaskMutation, useUpdateTaskMutation } from "../apiSlice"
 import { selectActiveColumns } from "../columns/columnsSlice"
 import { selectTaskById, taskAdded, taskUpdated } from "../tasks/tasksSlice"
 import Modal from "./Modal"
@@ -36,6 +37,9 @@ const NewTaskModal: React.FunctionComponent<Props> = ({
   const activeColumns = useSelector(selectActiveColumns)
   const dispatch = useDispatch()
 
+  const [newTask] = useNewTaskMutation()
+  const [updateTask] = useUpdateTaskMutation()
+
   const defaultValues = useMemo(
     () => ({
       title: "",
@@ -63,8 +67,21 @@ const NewTaskModal: React.FunctionComponent<Props> = ({
     }
   }, [task, activeColumns, reset, defaultValues])
 
-  const onSubmit = handleSubmit((data) => {
+  const onSubmit = handleSubmit(async (data) => {
     if (task) {
+      updateTask({
+        boardId: activeBoard!,
+        taskId: task.id,
+        task: {
+          title: data.title,
+          description: data.description,
+          subtasks: data.subtasks.map((subtask) => ({
+            title: subtask,
+            completed: false,
+          })),
+          status: data.status,
+        },
+      })
       dispatch(
         taskUpdated(task, {
           title: data.title,
@@ -78,14 +95,31 @@ const NewTaskModal: React.FunctionComponent<Props> = ({
         }),
       )
     } else {
-      dispatch(
-        taskAdded({
+      const taskId = await newTask({
+        boardId: activeBoard!,
+        task: {
           title: data.title,
           description: data.description,
           subtasks: data.subtasks.map((subtask) => ({
             title: subtask,
             completed: false,
           })),
+          status: data.status,
+        },
+      }).unwrap()
+      dispatch(
+        taskAdded({
+          id: taskId,
+          title: data.title,
+          description: data.description,
+          // If there is only one empty subtask, it means there are no subtasks
+          subtasks:
+            data.subtasks.length == 1 && data.subtasks[0] == ""
+              ? []
+              : data.subtasks.map((subtask) => ({
+                  title: subtask,
+                  completed: false,
+                })),
           column: activeColumns.find((column) => column.title === data.status)!
             .id,
           board: activeBoard!,
