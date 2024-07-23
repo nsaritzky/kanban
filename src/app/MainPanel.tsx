@@ -28,9 +28,9 @@ const MainPanel = () => {
   const [editBoardModal, setEditBoardModal] = useState(false)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [overContainerId, setOverContainerId] = useState<string | null>(null)
-  const [placeHolderIndex, setPlaceHolderIndex] = useState<
-    number | undefined | null
-  >(null)
+  /* const [_placeHolderIndex, setPlaceHolderIndex] = useState<
+   *   number | undefined | null
+   * >(null) */
   const activeBoardId = useSelector(selectActiveBoardId)
   const columnIds = useSelector(selectActiveBoardColumnIds)
   const columns = useSelector(selectAllColumns)
@@ -55,11 +55,11 @@ const MainPanel = () => {
       const task = tasks.find((task) => task.id == over?.id)
       if (task) {
         setOverContainerId(task.column)
-        setPlaceHolderIndex(
-          columns
-            .find((column) => column.id == task.column)
-            ?.taskIds.findIndex((id) => id == task.id),
-        )
+        /* setPlaceHolderIndex(
+         *   columns
+         *     .find((column) => column.id == task.column)
+         *     ?.taskIds.findIndex((id) => id == task.id),
+         * ) */
       }
     }
   }

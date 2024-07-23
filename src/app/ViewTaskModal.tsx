@@ -45,8 +45,7 @@ const ViewTaskModal: React.FunctionComponent<Props> = ({
   ).length
   const dispatch = useDispatch()
   const [deleteTask] = useDeleteTaskMutation()
-  const [updateTask, { isLoading: updateTaskLoading, error: updateTaskError }] =
-    useUpdateTaskMutation()
+  const [updateTask] = useUpdateTaskMutation()
 
   // Close the little edit popup menu when clicking outside of it
   useEffect(() => {
