@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import { useNavigate } from "react-router-dom"
+import { useDeleteBoardMutation } from "../apiSlice"
 import { boardRemoved, selectAllBoards } from "../boards/boardsSlice"
 import useScreenSize from "../utilities/useScreenSize"
 import DeleteModal from "./DeleteModal"
@@ -27,6 +29,7 @@ const Nav = () => {
   const boards = useSelector(selectAllBoards)
   const activeBoard = boards.find((board) => board.id === activeBoardId)
   const darkMode = useSelector((state: RootState) => state.UI.isDarkMode)
+  const [deleteBoard] = useDeleteBoardMutation()
 
   const { width: screenWidth } = useScreenSize()
   const isSmallScreen = screenWidth < 640
@@ -49,6 +52,13 @@ const Nav = () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [editMenuRef])
+
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await fetch("/kanban/api/logout")
+    navigate("/kanban/login")
+  }
 
   return (
     <>
@@ -92,7 +102,17 @@ const Nav = () => {
               onClick={() => setEditBoardPopup(true)}
               disabled={!activeBoardId}
             >
-              <img className="h-min" src={threeDots} alt="three dots" />
+              <img
+                className="mr-[16px] h-min"
+                src={threeDots}
+                alt="three dots"
+              />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="hover:text-main-purple dark:text-white dark:hover:text-main-purple"
+            >
+              Logout
             </button>
             {editBoardPopup && (
               <div
@@ -127,7 +147,8 @@ const Nav = () => {
             <DeleteModal
               title="Delete Board"
               description={`Are you sure you want to delete the '${activeBoard?.title}' board? This action will remove all columns and tasks and cannot be reversed.`}
-              onConfirm={() => {
+              onConfirm={async () => {
+                await deleteBoard(activeBoardId!)
                 dispatch(boardRemoved(activeBoardId!))
                 dispatch(setActiveBoardId(undefined))
               }}

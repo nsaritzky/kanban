@@ -1,9 +1,12 @@
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import data from "../data.json"
+import { RouterProvider, createBrowserRouter } from "react-router-dom"
+import demoData from "../data.json"
+import { useGetBoardsQuery } from "./apiSlice"
 import MainPanel from "./app/MainPanel"
 import Nav from "./app/Nav"
 import Sidebar from "./app/Sidebar"
+import { setDisableFetches } from "./app/store"
 import {
   selectDataLoaded,
   selectIsDarkMode,
@@ -11,9 +14,12 @@ import {
 } from "./app/uiState"
 import { selectBoardIds } from "./boards/boardsSlice"
 import { useData } from "./data"
+import Login from "./login"
+import { isAuthenticated } from "./utilities/isAuthenticated"
 
-function App() {
-  useData(data)
+const App = ({ demo }: { demo: boolean }) => {
+  const { data: boards } = useGetBoardsQuery()
+  useData(demo ? demoData : boards || { boards: [] })
   const darkMode = useSelector(selectIsDarkMode)
   const boardIds = useSelector(selectBoardIds)
   const dataLoaded = useSelector(selectDataLoaded)
@@ -23,7 +29,17 @@ function App() {
     if (boardIds.length > 0) {
       dispatch(setActiveBoardId(boardIds[0] as string))
     }
-  }, [dataLoaded])
+  }, [dataLoaded, boardIds, dispatch])
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.navigate("/kanban/login")
+    }
+  }, [])
+
+  useEffect(() => {
+    dispatch(setDisableFetches(demo))
+  }, [demo, dispatch])
 
   return (
     <div
@@ -40,4 +56,21 @@ function App() {
   )
 }
 
-export default App
+const router = createBrowserRouter([
+  {
+    path: "/kanban",
+    element: <App demo={false} />,
+  },
+  {
+    path: "/kanban/demo",
+    element: <App demo={true} />,
+  },
+  {
+    path: "/kanban/login",
+    Component: Login,
+  },
+])
+
+const AppWithRouter = () => <RouterProvider router={router} />
+
+export default AppWithRouter

@@ -4,7 +4,6 @@ import {
   createSelector,
   createSlice,
 } from "@reduxjs/toolkit"
-import { nanoid } from "nanoid"
 import type { RootState } from "../app/store"
 
 export interface Task {
@@ -24,15 +23,8 @@ const tasksSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
-    taskAdded: {
-      reducer: (state, action) => {
-        tasksAdapter.addOne(state, action.payload.task)
-      },
-      prepare: (task: Omit<Task, "id">) => ({
-        payload: { task: { ...task, id: nanoid() } },
-        meta: {},
-        error: {},
-      }),
+    taskAdded: (state, action) => {
+      tasksAdapter.addOne(state, action.payload)
     },
     taskUpdated: {
       reducer: tasksAdapter.updateOne,

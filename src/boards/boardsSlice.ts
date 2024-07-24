@@ -3,7 +3,6 @@ import {
   createSelector,
   createSlice,
 } from "@reduxjs/toolkit"
-import { nanoid } from "nanoid"
 import { type RootState } from "../app/store"
 import { columnAdded } from "../columns/columnsSlice"
 
@@ -21,12 +20,7 @@ const boardsSlice = createSlice({
   name: "boards",
   initialState,
   reducers: {
-    boardAdded: {
-      reducer: boardsAdapter.addOne,
-      prepare: (board: Omit<Board, "id">) => ({
-        payload: { ...board, id: nanoid() },
-      }),
-    },
+    boardAdded: boardsAdapter.addOne,
     boardUpdated: boardsAdapter.updateOne,
     boardsRemoved: boardsAdapter.removeMany,
     boardRemoved: boardsAdapter.removeOne,
