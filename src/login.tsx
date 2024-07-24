@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import logoDark from "../assets/logo-dark.svg"
 
 const Login = () => {
@@ -5,14 +6,14 @@ const Login = () => {
     <div className="bg-gray-100 dark:bg-gray-700 flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center">
         <img src={logoDark} alt="Kanban" className="mx-auto w-32" />
-        <a
+        <Link
           className="mt-4 hover:text-main-purple"
-          href={`${import.meta.env.BASE_URL}demo`}
+          to={`${import.meta.env.BASE_URL}demo`}
         >
           Demo
-        </a>
+        </Link>
         <div className="h-4"></div>
-        <a href="https://api.requirenathan.com/kanban/login/google">
+        <Link to="https://api.requirenathan.com/kanban/login/google">
           <button className="dark:bg-gray-900 border-gray-300 text-gray-800 hover:bg-gray-200 focus:ring-gray-500 flex items-center rounded-lg border bg-white px-6 py-2 text-sm font-medium shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 dark:text-white">
             <svg
               className="mr-2 h-6 w-6"
@@ -72,7 +73,7 @@ const Login = () => {
             </svg>
             <span>Log in with Google</span>
           </button>
-        </a>
+        </Link>
       </div>
     </div>
   )
