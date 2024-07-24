@@ -7,7 +7,7 @@ const Login = () => {
         <img src={logoDark} alt="Kanban" className="mx-auto w-32" />
         <a
           className="mt-4 hover:text-main-purple"
-          href={`${import.meta.env.VITE_BASE_URL}/demo`}
+          href={`${import.meta.env.BASE_URL}demo`}
         >
           Demo
         </a>
