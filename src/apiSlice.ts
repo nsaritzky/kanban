@@ -1,13 +1,34 @@
-import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react"
+import {
+    BaseQueryFn,
+    FetchArgs,
+    FetchBaseQueryError,
+    createApi,
+    fetchBaseQuery,
+    retry,
+} from "@reduxjs/toolkit/query/react"
+import { RootState } from "./app/store"
 import type { Board, Column, Task } from "./types"
 
+const customBaseQuery: BaseQueryFn<
+    string | FetchArgs,
+    unknown,
+    FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+    const state = api.getState() as RootState
+
+    if (state.global.disableFetches) {
+        return { data: null }
+    }
+
+    const baseQuery = fetchBaseQuery({
+        baseUrl: "https://api.requirenathan.com/kanban",
+        credentials: "include",
+    })
+    return baseQuery(args, api, extraOptions)
+}
+
 export const apiSlice = createApi({
-    baseQuery: retry(
-        fetchBaseQuery({
-            baseUrl: "https://api.requirenathan.com/kanban",
-            credentials: "include",
-        }),
-    ),
+    baseQuery: retry(customBaseQuery),
     endpoints: (builder) => ({
         getBoards: builder.query<{ boards: Board[] }, void>({
             query: () => "/user/boards",
