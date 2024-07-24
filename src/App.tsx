@@ -32,7 +32,7 @@ const App = ({ demo }: { demo: boolean }) => {
   }, [dataLoaded, boardIds, dispatch])
 
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!isAuthenticated() && !demo) {
       router.navigate("/kanban/login")
     }
   }, [])
