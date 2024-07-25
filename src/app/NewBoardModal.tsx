@@ -95,7 +95,6 @@ const NewBoardModal: React.FunctionComponent<Props> = ({
               title: columnName.name,
               boardId: board.id,
             }).unwrap()
-            console.log("hello")
             const columnAction = columnAdded({
               id: newColumnId,
               title: columnName.name,
@@ -130,7 +129,6 @@ const NewBoardModal: React.FunctionComponent<Props> = ({
         title: data.name,
         columns: data.columns.map((col) => ({ title: col.name, tasks: [] })),
       }).unwrap()
-      console.log(board)
       const addBoardAction = boardAdded({
         id: board._id,
         title: data.name,

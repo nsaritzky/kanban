@@ -54,7 +54,8 @@ export const apiSlice = createApi({
                     method: "POST",
                     body: { boardId, title },
                 }),
-                transformResponse: ({ data }) => data.columnId,
+                transformResponse: (data: { columnId: string }) =>
+                    data.columnId,
             },
         ),
         deleteColumn: builder.mutation<
