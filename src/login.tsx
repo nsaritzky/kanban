@@ -6,10 +6,7 @@ const Login = () => {
     <div className="bg-gray-100 dark:bg-gray-700 flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center">
         <img src={logoDark} alt="Kanban" className="mx-auto w-32" />
-        <Link
-          className="mt-4 hover:text-main-purple"
-          to={`${import.meta.env.BASE_URL}demo`}
-        >
+        <Link className="mt-4 hover:text-main-purple" to={`/demo`}>
           Demo
         </Link>
         <div className="h-4"></div>

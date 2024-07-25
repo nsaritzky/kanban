@@ -62,7 +62,7 @@ const router = createHashRouter([
     element: <App demo={false} />,
   },
   {
-    path: "/kanban/demo",
+    path: "/demo",
     element: <App demo={true} />,
   },
   {
