@@ -29,6 +29,7 @@ const Nav = () => {
   const boards = useSelector(selectAllBoards)
   const activeBoard = boards.find((board) => board.id === activeBoardId)
   const darkMode = useSelector((state: RootState) => state.UI.isDarkMode)
+  const demo = useSelector((state: RootState) => state.global.disableFetches)
   const [deleteBoard] = useDeleteBoardMutation()
 
   const { width: screenWidth } = useScreenSize()
@@ -56,8 +57,10 @@ const Nav = () => {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    await fetch("/kanban/api/logout")
-    navigate("/kanban/login")
+    if (!demo) {
+      await fetch("https://api.requirenathan.com/kanban/logout")
+    }
+    navigate("/login")
   }
 
   return (

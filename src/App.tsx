@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { RouterProvider, createBrowserRouter } from "react-router-dom"
+import { RouterProvider, createHashRouter } from "react-router-dom"
 import demoData from "../data.json"
 import { useGetBoardsQuery } from "./apiSlice"
 import MainPanel from "./app/MainPanel"
@@ -35,7 +35,7 @@ const App = ({ demo }: { demo: boolean }) => {
     if (!isAuthenticated() && !demo) {
       router.navigate("/kanban/login")
     }
-  }, [])
+  }, [demo])
 
   useEffect(() => {
     dispatch(setDisableFetches(demo))
@@ -56,17 +56,17 @@ const App = ({ demo }: { demo: boolean }) => {
   )
 }
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
-    path: "/kanban",
+    path: "",
     element: <App demo={false} />,
   },
   {
-    path: "/kanban/demo",
+    path: "/demo",
     element: <App demo={true} />,
   },
   {
-    path: "/kanban/login",
+    path: "/login",
     Component: Login,
   },
 ])
