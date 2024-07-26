@@ -34,7 +34,7 @@ export const TaskElement = forwardRef<HTMLDivElement, TaskProps>(
     }
 
     return (
-      <div ref={ref} {...props}>
+      <div className="touch-none" ref={ref} {...props}>
         <button
           onClick={() => {
             if (setActiveTask && setViewTaskModal) {

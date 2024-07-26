@@ -3,6 +3,7 @@ import {
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   closestCorners,
   useSensor,
   useSensors,
@@ -38,6 +39,9 @@ const MainPanel = () => {
   const [moveTask] = useMoveTaskMutation()
 
   const sensors = useSensors(
+    useSensor(TouchSensor, {
+      activationConstraint: { tolerance: 5, delay: 250 },
+    }),
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
