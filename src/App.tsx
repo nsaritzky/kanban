@@ -33,7 +33,7 @@ const App = ({ demo }: { demo: boolean }) => {
 
   useEffect(() => {
     if (!isAuthenticated() && !demo) {
-      router.navigate("/kanban/login")
+      router.navigate("/login")
     }
   }, [demo])
 
